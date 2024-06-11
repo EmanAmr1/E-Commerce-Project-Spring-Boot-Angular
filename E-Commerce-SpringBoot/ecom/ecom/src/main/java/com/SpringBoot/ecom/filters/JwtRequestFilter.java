@@ -1,5 +1,6 @@
 package com.SpringBoot.ecom.filters;
 
+import com.SpringBoot.ecom.servicesjwt.UserDetailsServiceImpl;
 import com.SpringBoot.ecom.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
