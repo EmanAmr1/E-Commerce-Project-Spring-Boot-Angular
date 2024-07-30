@@ -6,6 +6,7 @@ import com.SpringBoot.ecom.repository.UserRepository;
 import com.SpringBoot.ecom.utils.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,42 +25,44 @@ import java.util.Optional;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-
     private final UserDetailsService userDetailsService;
-
     private final UserRepository userRepository;
-
     private final JwtUtil jwtUtil;
 
-    public static final String TOKEN_PREFIX="Bearer ";
-
-
-    public static final String HEADER_STRING="Authorization";
+    public static final String TOKEN_PREFIX = "Bearer ";
+    public static final String HEADER_STRING = "Authorization";
 
     @PostMapping("/authenticate")
-    public void createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest,
-                                          HttpServletResponse response) throws IOException {
+    public void createAuthenticationToken(@RequestBody
+                                              AuthenticationRequest authenticationRequest,
+                                              HttpServletResponse response)
+            throws IOException, JSONException {
+
+
+
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(),
-                    authenticationRequest.getPassword()));
-
-        }catch (BadCredentialsException e){
-
-            throw new BadCredentialsException("incorrect username or password");
-
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Incorrect username or password");
+            return;
         }
-        final  UserDetails userDetails=userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
 
-        Optional<User> optionalUser =userRepository.findFirstByEmail(userDetails.getUsername());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        Optional<User> optionalUser = userRepository.findFirstByEmail(userDetails.getUsername());
 
-        final String jwt=jwtUtil.generateToken(userDetails.getUsername());
+        String jwt = jwtUtil.generateToken(userDetails.getUsername());  //generate token to this user
 
-        if(optionalUser.isPresent()){
-            response.getWriter().write(new JSONObject().put("userId", optionalUser.get().getId())
-                    .put("role",optionalUser.get().getRole().toString()));
-        };
+        if (optionalUser.isPresent()) {
+            JSONObject jsonResponse = new JSONObject()
 
-        response.addHeader(HEADER_STRING , TOKEN_PREFIX+jwt);
+                    .put("userId", optionalUser.get().getId())
+                    .put("role", optionalUser.get().getRole().toString());
+
+            response.setContentType("application/json");
+            response.getWriter().write(jsonResponse.toString());
+        }
+
+        response.addHeader(HEADER_STRING, TOKEN_PREFIX + jwt);
     }
-
 }

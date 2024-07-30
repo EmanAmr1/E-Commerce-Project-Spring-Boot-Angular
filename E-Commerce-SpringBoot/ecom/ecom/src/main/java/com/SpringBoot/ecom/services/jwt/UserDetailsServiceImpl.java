@@ -1,4 +1,4 @@
-package com.SpringBoot.ecom.servicesjwt;
+package com.SpringBoot.ecom.services.jwt;
 
 import com.SpringBoot.ecom.entity.User;
 import com.SpringBoot.ecom.repository.UserRepository;
