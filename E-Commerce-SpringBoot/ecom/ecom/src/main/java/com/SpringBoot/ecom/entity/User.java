@@ -21,8 +21,8 @@ public class User {
 
     private UserRole role;
 
-    @Lob
-    @Column(columnDefinition = "bytea")
-    private byte[] img;
+    /*@Lob
+    @Column(columnDefinition = "BYTEA")
+    private byte[] img;*/
 
 }

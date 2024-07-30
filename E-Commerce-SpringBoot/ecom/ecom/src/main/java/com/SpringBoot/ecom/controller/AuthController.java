@@ -4,9 +4,11 @@ import com.SpringBoot.ecom.dto.AuthenticationRequest;
 import com.SpringBoot.ecom.dto.SignupRequest;
 import com.SpringBoot.ecom.dto.UserDto;
 import com.SpringBoot.ecom.entity.User;
+import com.SpringBoot.ecom.enums.UserRole;
 import com.SpringBoot.ecom.repository.UserRepository;
 import com.SpringBoot.ecom.services.auth.AuthService;
 import com.SpringBoot.ecom.utils.JwtUtil;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -83,6 +86,24 @@ public class AuthController {
         UserDto userDto=authService.CraeteUser(signupRequest);
       return new ResponseEntity<>(userDto,HttpStatus.OK);
 
+    }
+
+
+
+
+    @PostConstruct
+    public void createAdminAccount(){
+
+        User adminAccount=userRepository.findByRole(UserRole.ADMIN);
+        if(adminAccount==null){
+
+           User user=new User();
+           user.setEmail("Admin@gmail.com");
+           user.setName("Admin");
+           user.setRole(UserRole.ADMIN);
+           user.setPassword(new BCryptPasswordEncoder().encode("admin"));
+           userRepository.save(user);
+        }
     }
 
 
