@@ -45,7 +45,7 @@ if(password !== confirmPassword){
 this.authService.register(this.signupForm.value).subscribe(
 
   (response)=>{
-    this.snackBar.open("sign up successfully","close",{duration:5000 } );
+    this.snackBar.open("sign up successfully","ok",{duration:5000 } );
     this.router.navigateByUrl("/login");
   }
 

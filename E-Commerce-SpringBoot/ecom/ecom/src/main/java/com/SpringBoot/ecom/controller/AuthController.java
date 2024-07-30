@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,7 +44,7 @@ public class AuthController {
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_STRING = "Authorization";
 
-    @PostMapping("/authenticate")
+   /* @PostMapping("/authenticate")
     public void createAuthenticationToken(@RequestBody
                                               AuthenticationRequest authenticationRequest,
                                               HttpServletResponse response)
@@ -73,9 +74,50 @@ public class AuthController {
             response.setContentType("application/json");
             response.getWriter().write(jsonResponse.toString());
         }
+        /*response.addHeader("Access-Control-Expose-Headers", "Authorization");
+        response.addHeader("Access-Control-Allow-Origin", "Authorization ,x-PINGOTHER ,origin ,"+
+                "x-requested-with,Content-Type,Accept, X-Custom-Header");
+
+        response.addHeader("Access-Control-Expose-Headers", "Authorization");
+        response.addHeader("Access-Control-Allow-Origin", "http://localhost:4200"); // Correct header setup
 
         response.addHeader(HEADER_STRING, TOKEN_PREFIX + jwt);
     }
+
+    */
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws JSONException {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED)
+                    .body("Incorrect username or password");
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
+        Optional<User> optionalUser = userRepository.findFirstByEmail(userDetails.getUsername());
+        String jwt = jwtUtil.generateToken(userDetails.getUsername());
+
+        if (optionalUser.isPresent()) {
+            JSONObject jsonResponse = new JSONObject()
+                    .put("userId", optionalUser.get().getId())
+                    .put("role", optionalUser.get().getRole().toString());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + jwt);
+            headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.AUTHORIZATION);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(jsonResponse.toString());
+        }
+
+        return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND)
+                .body("User not found");
+    }
+
 
 
     @PostMapping("/sign-up")
