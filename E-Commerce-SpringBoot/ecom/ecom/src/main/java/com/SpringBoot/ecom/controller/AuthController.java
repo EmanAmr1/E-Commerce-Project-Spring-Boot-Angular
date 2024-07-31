@@ -42,53 +42,13 @@ public class AuthController {
     private final AuthService authService;
 
     public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String HEADER_STRING = "Authorization";
-
-   /* @PostMapping("/authenticate")
-    public void createAuthenticationToken(@RequestBody
-                                              AuthenticationRequest authenticationRequest,
-                                              HttpServletResponse response)
-            throws IOException, JSONException {
-
-
-
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    authenticationRequest.getUsername(), authenticationRequest.getPassword()));
-        } catch (BadCredentialsException e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Incorrect username or password");
-            return;
-        }
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-        Optional<User> optionalUser = userRepository.findFirstByEmail(userDetails.getUsername());
-
-        String jwt = jwtUtil.generateToken(userDetails.getUsername());  //generate token to this user
-
-        if (optionalUser.isPresent()) {
-            JSONObject jsonResponse = new JSONObject()
-
-                    .put("userId", optionalUser.get().getId())
-                    .put("role", optionalUser.get().getRole().toString());
-
-            response.setContentType("application/json");
-            response.getWriter().write(jsonResponse.toString());
-        }
-        /*response.addHeader("Access-Control-Expose-Headers", "Authorization");
-        response.addHeader("Access-Control-Allow-Origin", "Authorization ,x-PINGOTHER ,origin ,"+
-                "x-requested-with,Content-Type,Accept, X-Custom-Header");
-
-        response.addHeader("Access-Control-Expose-Headers", "Authorization");
-        response.addHeader("Access-Control-Allow-Origin", "http://localhost:4200"); // Correct header setup
-
-        response.addHeader(HEADER_STRING, TOKEN_PREFIX + jwt);
-    }
-
-    */
+    
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws JSONException {
         try {
+            //attempts to authenticate the user with the provided username and password.
+            // Creates a token using the username and password from the authenticationRequest
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     authenticationRequest.getUsername(), authenticationRequest.getPassword()));
         } catch (BadCredentialsException e) {
@@ -98,7 +58,7 @@ public class AuthController {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         Optional<User> optionalUser = userRepository.findFirstByEmail(userDetails.getUsername());
-        String jwt = jwtUtil.generateToken(userDetails.getUsername());
+        String jwt = jwtUtil.generateToken(userDetails.getUsername());  //generate token to this user
 
         if (optionalUser.isPresent()) {
             JSONObject jsonResponse = new JSONObject()
@@ -107,8 +67,11 @@ public class AuthController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + jwt);
+            //Allows the Authorization header to be exposed in the response.
             headers.add(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.AUTHORIZATION);
 
+  //Returns an HTTP 200 OK response with the headers and JSON body.
+            //jsonResponse.toString() method is used to convert the JSONObject into a string
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(jsonResponse.toString());

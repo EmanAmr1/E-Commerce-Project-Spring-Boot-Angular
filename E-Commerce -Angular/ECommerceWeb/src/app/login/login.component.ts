@@ -11,43 +11,43 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  loginForm !:FormGroup;
+  loginForm !: FormGroup;
 
-  hidepassword=true;
+  hidepassword = true;
 
-  constructor(private fb:FormBuilder , private snackBar:MatSnackBar, private authService:AuthService ,private router:Router ) { }
+  constructor(private fb: FormBuilder, private snackBar: MatSnackBar, private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
 
     this.loginForm = this.fb.group({
-      email: [null,[Validators.required ,Validators.email]],
-      password:[null,[Validators.required ]],
+      email: [null, [Validators.required, Validators.email]],
+      password: [null, [Validators.required]],
     })
   }
 
 
 
-  togglePasswordVisibility(){
-    this.hidepassword =!this.hidepassword
+  togglePasswordVisibility() {
+    this.hidepassword = !this.hidepassword
+  }
+
+  onSubmit(): void {
+    const userName = this.loginForm.get('email')?.value;
+    const password = this.loginForm.get('password')?.value;
+
+    this.authService.login(userName, password).subscribe(
+
+      (response: any) => {
+        this.snackBar.open("login successfully", "ok", { duration: 5000 });
+
       }
 
-      onSubmit():void{
-        const userName =this.loginForm.get('email')?.value;
-        const password =this.loginForm.get('password')?.value;
-       
-        this.authService.login(userName,password).subscribe(
-        
-          (response: any) => {
-            this.snackBar.open("login successfully","ok",{duration:5000 } );
-   
-          }
-        
-        ,(error: HttpErrorResponse) => {
-            this.snackBar.open("Bad credentials, please try again","Error",{duration:5000 } );
- 
-          }
-        
-        )
-        }
+      , (error: HttpErrorResponse) => {
+        this.snackBar.open("Bad credentials, please try again", "Error", { duration: 5000 });
+
+      }
+
+    )
+  }
 
 }
