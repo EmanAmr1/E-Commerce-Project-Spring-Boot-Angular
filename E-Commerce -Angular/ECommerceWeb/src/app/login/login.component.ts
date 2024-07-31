@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../services/auth/auth.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { UserStorageService } from '../services/storage/user-storage.service';
 
 @Component({
   selector: 'app-login',
@@ -32,13 +33,26 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
+
     const userName = this.loginForm.get('email')?.value;
     const password = this.loginForm.get('password')?.value;
 
+
+
     this.authService.login(userName, password).subscribe(
 
+
       (response: any) => {
-        this.snackBar.open("login successfully", "ok", { duration: 5000 });
+
+        console.log('Token:', UserStorageService.getToken());
+        console.log('Role:', UserStorageService.getUserRole());
+
+        if(UserStorageService.isAdminLoggedIn()){
+          this.router.navigateByUrl("/admin/dashboard");
+        } else if(UserStorageService.isCustomerLoggedIn()){
+          this.router.navigateByUrl("/customer/dashboard");
+        }
+
 
       }
 

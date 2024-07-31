@@ -42,7 +42,7 @@ public class AuthController {
     private final AuthService authService;
 
     public static final String TOKEN_PREFIX = "Bearer ";
-    
+
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws JSONException {
