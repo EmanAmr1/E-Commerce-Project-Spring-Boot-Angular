@@ -108,7 +108,7 @@ public class AuthController {
            user.setEmail("Admin@gmail.com");
            user.setName("Admin");
            user.setRole(UserRole.ADMIN);
-           user.setPassword(new BCryptPasswordEncoder().encode("admin"));
+           user.setPassword(new BCryptPasswordEncoder().encode("1234"));
            userRepository.save(user);
         }
     }
